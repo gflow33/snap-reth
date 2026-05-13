@@ -1,6 +1,6 @@
 name: reth
 title: reth
-base: core22
+base: core24
 adopt-info: reth
 summary: Rust implemetation of ehtereum client
 license: MIT
@@ -11,8 +11,8 @@ website: https://www.dwellir.com
 grade: stable
 confinement: strict
 
-architectures:
-  - amd64
+platforms:
+  amd64:
 
 description: |
   https://github.com/paradigmxyz/reth
@@ -33,7 +33,7 @@ parts:
   reth:
     plugin: rust
     source: https://github.com/paradigmxyz/reth.git
-    source-tag: v1.1.0
+    source-tag: v2.2.0
     source-depth: 1
     build-packages:
       - build-essential
@@ -43,11 +43,10 @@ parts:
       - protobuf-compiler
     # Make the commit hash available for snap info
     override-pull: |
-      craftctl default
-      craftctl set version="1.1.0-$(git rev-parse --short HEAD)"
+      rustup install stable
       rustup default stable
-      rustup update
-     
+      craftctl default
+      craftctl set version="2.2.0-$(git rev-parse --short HEAD)"
     override-build: |
       # craftctl default 
       # This will place the reth binary under target/maxperf/reth
@@ -82,14 +81,15 @@ apps:
     daemon: simple
     install-mode: disable
     refresh-mode: endure
-    restart-condition: never
+    restart-condition: on-failure
     plugs:
       - network
       - network-bind
       - system-observe 
       - removable-media
+      - hardware-observe
     environment:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
   reth:
-    command: bin/reth
+    command: wrappers/run-reth-cli.bash
